@@ -274,6 +274,11 @@ public:
 
                 Bytes truncatedData =
                     sectorData->data.slice(0, trackdata.sector_size());
+                // To create an invalid checksum, truncate the data
+                // to shorter than normal.
+                if (sectorData->status == Sector::BAD_CHECKSUM) {
+                    truncatedData = truncatedData.slice(0, 32);
+                }
                 bw += truncatedData;
                 uint16_t crc = crc16(CCITT_POLY, data);
                 bw.write_be16(crc);

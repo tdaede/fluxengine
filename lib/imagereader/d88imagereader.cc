@@ -128,9 +128,6 @@ public:
                 if (rpm != 0)
                     Error()
                         << "D88: 1.44MB 300rpm formats currently unsupported";
-                if (fddStatusCode != 0)
-                    Error() << "D88: nonzero fdd status codes are currently "
-                               "unsupported";
                 if (currentSectorsInTrack == 0xffff)
                 {
                     currentSectorsInTrack = sectorsInTrack;
@@ -194,12 +191,22 @@ public:
                 inputFile.read((char*)data.begin(), data.size());
                 inputFile.seekg(dataLength-sectorSize, std::ios_base::cur);
                 const auto& sector = image->put(track, head, sectorId);
-                sector->status = Sector::OK;
                 sector->logicalTrack = track;
                 sector->physicalTrack = Mapper::remapTrackLogicalToPhysical(track);
                 sector->logicalSide = sector->physicalHead = head;
                 sector->logicalSector = sectorId;
                 sector->data = data;
+                switch (fddStatusCode) {
+                    case 0:
+                        sector->status = Sector::OK;
+                        break;
+                    case 0xB0:
+                        sector->status = Sector::BAD_CHECKSUM;
+                        break;
+                    default:
+                        Error() << "D88: Unsupported status code";
+                        break;
+                }
 
                 sectors->add_sector(sectorId);
             }
