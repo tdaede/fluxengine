@@ -182,11 +182,6 @@ public:
                         }
                     }
                 }
-                else if (trackSectorSize != sectorSize)
-                {
-                    Error() << "D88: multiple sector sizes per track are "
-                               "currently unsupported";
-                }
                 Bytes data(sectorSize);
                 inputFile.read((char*)data.begin(), data.size());
                 inputFile.seekg(dataLength-sectorSize, std::ios_base::cur);

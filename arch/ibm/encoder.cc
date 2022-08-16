@@ -186,16 +186,6 @@ public:
         uint8_t idamUnencoded = decodeUint16(trackdata.idam_byte());
         uint8_t damUnencoded = decodeUint16(trackdata.dam_byte());
 
-        uint8_t sectorSize = 0;
-        {
-            int s = trackdata.sector_size() >> 7;
-            while (s > 1)
-            {
-                s >>= 1;
-                sectorSize += 1;
-            }
-        }
-
         uint16_t gapFill = trackdata.gap_fill_byte();
 
         writeFillerRawBytes(trackdata.gap0(), gapFill);
@@ -215,6 +205,16 @@ public:
         bool first = true;
         for (const auto& sectorData : sectors)
         {
+            uint8_t sectorSize = 0;
+            {
+                int s = sectorData->data.size() >> 7;
+                while (s > 1)
+                {
+                    s >>= 1;
+                    sectorSize += 1;
+                }
+            }
+
             if (!first)
                 writeFillerRawBytes(trackdata.gap3(), gapFill);
             first = false;
@@ -272,8 +272,7 @@ public:
                 }
                 bw.write_8(damUnencoded);
 
-                Bytes truncatedData =
-                    sectorData->data.slice(0, trackdata.sector_size());
+                Bytes truncatedData = sectorData->data;
                 // To create an invalid checksum, truncate the data
                 // to shorter than normal.
                 if (sectorData->status == Sector::BAD_CHECKSUM) {
