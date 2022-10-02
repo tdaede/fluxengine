@@ -58,8 +58,9 @@ public:
         auto ibm = config.mutable_encoder()->mutable_ibm();
         config.mutable_tracks()->set_end(0);
         Logger() << "NFD: HD 1.2MB mode";
-        if (!config.drive().has_drive())
-            config.mutable_drive()->set_high_density(true);
+        Logger() << "NFD: forcing hign density mode";
+        config.mutable_drive()->set_high_density(true);
+        config.set_tpi(96);
 
         std::unique_ptr<Image> image(new Image);
         for (int track = 0; track < 163; track++)
